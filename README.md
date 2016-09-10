@@ -42,3 +42,9 @@ sudo systemctl stop isuxi.go
 パラメータ等はsystemdのファイル `/etc/systemd/system/isuxi.go.service` を参照してください。
 
 > イメージ起動時点ではRubyが起動しているので、先にRubyの停止をしないとGoが起動しません
+
+
+## 環境構築
+- [azure-isucon-templates/isucon5-qualifier](https://github.com/matsuu/azure-isucon-templates/tree/master/isucon5-qualifier)
+  - azure環境にデプロイできる
+    - core数が足りないエラーが出る場合は設定ファイルからStandard_F4s・Standard_F8sを削る

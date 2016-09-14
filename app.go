@@ -171,7 +171,7 @@ func getUserFromAccount(w http.ResponseWriter, name string) *User {
 func isFriend(w http.ResponseWriter, r *http.Request, anotherID int) bool {
 	session := getSession(w, r)
 	id := session.Values["user_id"]
-	val, err := cliend.Get(id).Result()
+	val, err := client.Get(id).Result()
 	checkErr(err)
 	return err == nil
 }

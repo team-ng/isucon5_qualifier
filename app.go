@@ -162,7 +162,7 @@ func isFriend(w http.ResponseWriter, r *http.Request, anotherID int) bool {
 	return *cnt > 0
 }
 
-func isFrienAccount(w http.ResponseWriter, r *http.Request, name string) bool {
+func isFriendAccount(w http.ResponseWriter, r *http.Request, name string) bool {
 	user := getUserFromAccount(w, name)
 	if user == nil {
 		return false

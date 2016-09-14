@@ -3,7 +3,7 @@ package main
 import(
 	"database/sql"
 	"gopkg.in/redis.v4"
-	"github.com/go-sql-driver/mysql"	
+	_ "github.com/go-sql-driver/mysql"	
 	"log"
 	"os"
 	"strconv"

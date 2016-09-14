@@ -16,12 +16,28 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"gopkg.in/redis.v4"	
 )
 
 var (
 	db    *sql.DB
 	store *sessions.CookieStore
+	client *redis.Client	
 )
+
+
+func initRedis() {
+	client = redis.NewClient(&redis.Options{
+		Addr:         ":6379",
+		DialTimeout:  10 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		PoolSize:     10,
+		PoolTimeout:  30 * time.Second,
+	})
+	// client.FlushDb()
+}
+
 
 type User struct {
 	ID          int
@@ -155,14 +171,12 @@ func getUserFromAccount(w http.ResponseWriter, name string) *User {
 func isFriend(w http.ResponseWriter, r *http.Request, anotherID int) bool {
 	session := getSession(w, r)
 	id := session.Values["user_id"]
-	row := db.QueryRow(`SELECT COUNT(1) AS cnt FROM relations WHERE (one = ? AND another = ?) OR (one = ? AND another = ?)`, id, anotherID, anotherID, id)
-	cnt := new(int)
-	err := row.Scan(cnt)
+	val, err := cliend.Get(id).Result()
 	checkErr(err)
-	return *cnt > 0
+	return err == nil
 }
 
-func isFrienAccount(w http.ResponseWriter, r *http.Request, name string) bool {
+func isFriendAccount(w http.ResponseWriter, r *http.Request, name string) bool {
 	user := getUserFromAccount(w, name)
 	if user == nil {
 		return false
@@ -700,7 +714,7 @@ func PostFriends(w http.ResponseWriter, r *http.Request) {
 	anotherAccount := mux.Vars(r)["account_name"]
 	if !isFriendAccount(w, r, anotherAccount) {
 		another := getUserFromAccount(w, anotherAccount)
-		_, err := db.Exec(`INSERT INTO relations (one, another) VALUES (?,?), (?,?)`, user.ID, another.ID, another.ID, user.ID)
+		err = client.Set(user.ID, another.ID, 0).Err()		
 		checkErr(err)
 		http.Redirect(w, r, "/friends", http.StatusSeeOther)
 	}
@@ -715,6 +729,7 @@ func GetInitialize(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+	initRedis() 	
 	
 	host := os.Getenv("ISUCON5_DB_HOST")
 	if host == "" {

@@ -47,7 +47,7 @@ func min(a, b int) int {
 }
 
 func max(a, b int) int {
-    if a > b {
+    if a >  b {
         return a
     }
     return b
@@ -730,8 +730,7 @@ func PostFriends(w http.ResponseWriter, r *http.Request) {
 	if !isFriendAccount(w, r, anotherAccount) {
 		another := getUserFromAccount(w, anotherAccount)
 		key := fmt.Sprintf("rel-%d-%d", min(user.ID, another.ID), max(user.ID, another.ID))
-		
-		err := client.Set(key, "1", 0).Err()		
+		err := client.Set(key, "1", 0).Err()
 		checkErr(err)
 		http.Redirect(w, r, "/friends", http.StatusSeeOther)
 	}

@@ -16,7 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"gopkg.in/redis.v4"	
+	"gopkg.in/redis.v4"
+	"fmt"
 )
 
 var (
@@ -38,6 +39,19 @@ func initRedis() {
 	// client.FlushDb()
 }
 
+func min(a, b int) int {
+    if a < b {
+        return a
+    }
+    return b
+}
+
+func max(a, b int) int {
+    if a < b {
+        return a
+    }
+    return b
+}
 
 type User struct {
 	ID          int
@@ -170,10 +184,11 @@ func getUserFromAccount(w http.ResponseWriter, name string) *User {
 
 func isFriend(w http.ResponseWriter, r *http.Request, anotherID int) bool {
 	session := getSession(w, r)
-	id := session.Values["user_id"]
-	val, err := client.Get(id).Result()
+	id  := session.Values["user_id"]
+	key := fmt.Sprintf("rel-%d-%d", min(id.(int), anotherID), max(id.(int), anotherID))
+	val, err := client.Exists(key).Result()
 	checkErr(err)
-	return err == nil
+	return val
 }
 
 func isFriendAccount(w http.ResponseWriter, r *http.Request, name string) bool {
@@ -714,7 +729,8 @@ func PostFriends(w http.ResponseWriter, r *http.Request) {
 	anotherAccount := mux.Vars(r)["account_name"]
 	if !isFriendAccount(w, r, anotherAccount) {
 		another := getUserFromAccount(w, anotherAccount)
-		err = client.Set(user.ID, another.ID, 0).Err()		
+		key := fmt.Sprintf("rel-%d-%d", min(user.ID, another.ID), max(user.ID, another.ID))
+		err := client.Set(key, "1", 0).Err()		
 		checkErr(err)
 		http.Redirect(w, r, "/friends", http.StatusSeeOther)
 	}

@@ -31,47 +31,17 @@ func max(a, b int) int {
 
 
 func initDB() {
-	host := os.Getenv("ISUCON5_DB_HOST")
-	if host == "" {
-		host = "localhost"
-	}
-	portstr := os.Getenv("ISUCON5_DB_PORT")
-	if portstr == "" {
-		portstr = "3306"
-	}
-	port, err := strconv.Atoi(portstr)
-	if err != nil {
-		log.Fatalf("Failed to read DB port number from an environment variable ISUCON5_DB_PORT.\nError: %s", err.Error())
-	}
-	user := os.Getenv("ISUCON5_DB_USER")
-	if user == "" {
-		user = "isucon"
-	}
-	password := os.Getenv("ISUCON5_DB_PASSWORD")
-	if password == "" {
-		password = "isucon"
-	}
-	dbname := os.Getenv("ISUCON5_DB_NAME")
-	if dbname == "" {
-		dbname = "isucon5q"
-	}
-	ssecret := os.Getenv("ISUCON5_SESSION_SECRET")
-	if ssecret == "" {
-		ssecret = "beermoris"
-	}
-
-	db, err = sql.Open("mysql", user+":"+password+"@tcp("+host+":"+strconv.Itoa(port)+")/"+dbname+"?loc=Local&parseTime=true")
-	if err != nil {
-		log.Fatalf("Failed to connect to DB: %s.", err.Error())
-	}
+	host := "localhost"
+	portstr := "3306"
+	user := "isucon"
+  password := "isucon"
+	dbname := "isucon5q"
+	ssecret := "beermoris"
 	defer db.Close()	
 }
 
 func main() {
-	
 	initDB()
-
-	
 	rows, err := db.Query(`SELECT one, another FROM relations`)
 	if err != nil {
 		panic(err)
